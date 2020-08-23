@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
  * @userid jisenberg3
  * @GTID 903556168
  *
- * Collaborators: N/A
+ * Collaborators: Justin Hinckley
  *
  * Resources: N/A
  */
