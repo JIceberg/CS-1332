@@ -106,7 +106,7 @@ public class DoublyLinkedList<T> {
         if (tail == null) {
             tail = new DoublyLinkedListNode<>(data, head, null);
             head = tail;
-        } else if (head == null && size == 1) {
+        } else if (head == null) {
             head = tail;
             DoublyLinkedListNode<T> newNode = new DoublyLinkedListNode<>(data, head, null);
             tail.setNext(newNode);
