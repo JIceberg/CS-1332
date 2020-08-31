@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
  * @userid jisenberg3
  * @GTID 903556168
  *
- * Collaborators: Justin Hinckley
+ * Collaborators: N/A
  *
  * Resources: N/A
  */
@@ -33,6 +33,9 @@ public class DoublyLinkedList<T> {
      * @throws java.lang.IllegalArgumentException  if data is null
      */
     public void addAtIndex(int index, T data) {
+        if (data == null) {
+            throw new IllegalArgumentException("Cannot add null data to the list");
+        }
         if (index < 0 || index > size) {
             throw new IndexOutOfBoundsException("Index out of bounds: " + index
                     + " is not within range 0 to " + size);
@@ -283,12 +286,21 @@ public class DoublyLinkedList<T> {
         if (data == null) {
             throw new IllegalArgumentException("Cannot remove null data from the list");
         }
+        if (isEmpty()) {
+            throw new NoSuchElementException("Cannot remove from an empty list");
+        }
         DoublyLinkedListNode<T> curr = tail;
         while (!data.equals(curr.getData()) && curr != head) {
             curr = curr.getPrevious();
         }
         if (!data.equals(curr.getData())) {
             throw new NoSuchElementException("Cannot remove data not in list: " + data);
+        }
+        if (curr == head) {
+            return removeFromFront();
+        }
+        if (curr == tail) {
+            return removeFromBack();
         }
         DoublyLinkedListNode<T> prev = curr.getPrevious();
         DoublyLinkedListNode<T> next = curr.getNext();
