@@ -64,14 +64,25 @@ public class ArrayList<T> {
             throw new IllegalArgumentException("Cannot add null data into the list");
         }
         if (size == backingArray.length) {
-            increaseCapacity();
-        }
-        // this is O(n) at worst case, O(1) at best case
-        for (int i = size; i > index; i--) {
-            backingArray[i] = backingArray[i - 1];
+            T[] doubledBackingArray = (T[]) new Object[backingArray.length * 2];
+            for (int i = 0; i < backingArray.length + 1; i++) {
+                if (i < index) {
+                    doubledBackingArray[i] = backingArray[i];
+                } else if (i == index) {
+                    doubledBackingArray[i] = data;
+                } else {
+                    doubledBackingArray[i] = backingArray[i - 1];
+                }
+            }
+            backingArray = doubledBackingArray;
+        } else {
+            // this is O(n) at worst case, O(1) at best case
+            for (int i = size; i > index; i--) {
+                backingArray[i] = backingArray[i - 1];
+            }
+            backingArray[index] = data;
         }
         size++;
-        backingArray[index] = data;
     }
 
     /**
@@ -89,14 +100,20 @@ public class ArrayList<T> {
             throw new IllegalArgumentException("Cannot add null data into the list");
         }
         if (size == backingArray.length) {
-            increaseCapacity();
-        }
-        // this will be O(n)
-        for (int i = size; i > 0; i--) {
-            backingArray[i] = backingArray[i - 1];
+            T[] doubledBackingArray = (T[]) new Object[backingArray.length * 2];
+            doubledBackingArray[0] = data;
+            for (int i = 1; i < backingArray.length + 1; i++) {
+                doubledBackingArray[i] = backingArray[i - 1];
+            }
+            backingArray = doubledBackingArray;
+        } else {
+            // this is O(n)
+            for (int i = size; i > 0; i--) {
+                backingArray[i] = backingArray[i - 1];
+            }
+            backingArray[0] = data;
         }
         size++;
-        backingArray[0] = data;
     }
 
     /**
