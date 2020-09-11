@@ -509,8 +509,9 @@ public class BST<T extends Comparable<? super T>> {
      *                                            in the BST
      */
     public List<T> kLargest(int k) {
-        if (k > size) {
-            throw new IllegalArgumentException("Cannot retrieve more elements than the tree size");
+        if (k > size || k < 0) {
+            throw new IllegalArgumentException("Cannot retrieve " + k
+                    + " elements from a tree of size " + size);
         }
         LinkedList<T> list = new LinkedList<>();
         kLargest(list, k, root);

@@ -1473,15 +1473,7 @@ public class BSTJeonghoonTest {
         tree.add(17);
         //WE ASSUME THAT ADD METHOD WORKS PROPERLY.
 
-        assertEquals(list, tree.kLargest(-2));
-        assertEquals(list, tree.kLargest(-1));
         assertEquals(list, tree.kLargest(0));
-
-        //Should not throw any exception
-        //See Piazza post @547
-        //I could see only a answer that
-        //"It shouldn't be regarded as an edge case. The list will simply be empty."
-        // If any update there, please let me know.
 
         list.add(17);
 
