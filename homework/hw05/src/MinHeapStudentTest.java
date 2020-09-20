@@ -102,6 +102,48 @@ public class MinHeapStudentTest {
     }
 
     @Test(timeout = TIMEOUT)
+    public void testAddOverCapacity() {
+        /*
+                            2
+                       /          \
+                      3            4
+                    /   \        /   \
+                   5     6      7     8
+                  / \   / \    /
+                 9  10 11 12  13
+
+            ->
+
+                            1
+                       /          \
+                      3            2
+                    /   \        /   \
+                   5     6      4     8
+                  / \   / \    / \
+                 9  10 11 12  13  7
+        */
+        for (int i = 2; i <= 13; i++) {
+            minHeap.add(i);
+        }
+        minHeap.add(1);
+        Integer[] expected = new Integer[26];
+        expected[1] = 1;
+        expected[2] = 3;
+        expected[3] = 2;
+        expected[4] = 5;
+        expected[5] = 6;
+        expected[6] = 4;
+        expected[7] = 8;
+        expected[8] = 9;
+        expected[9] = 10;
+        expected[10] = 11;
+        expected[11] = 12;
+        expected[12] = 13;
+        expected[13] = 7;
+        assertArrayEquals(expected, minHeap.getBackingArray());
+    }
+
+    @Test(timeout = TIMEOUT)
     public void testRemove() {
         /*
                  1
