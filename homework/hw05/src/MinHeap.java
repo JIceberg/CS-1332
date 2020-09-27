@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
  * Your implementation of a MinHeap.
  *
  * @author Jackson Isenberg
- * @version 1.0
+ * @version 1.2
  * @userid jisenberg3
  * @GTID 903556168
  *
@@ -60,10 +60,17 @@ public class MinHeap<T extends Comparable<? super T>> {
      *                                            is null
      */
     public MinHeap(ArrayList<T> data) {
+        if (data == null) {
+            throw new IllegalArgumentException("Cannot build a heap with a null list");
+        }
+
         backingArray = (T[]) new Comparable[data.size() * 2 + 1];
         size = data.size();
 
         for (int i = 1; i <= size; i++) {
+            if (data.get(i - 1) == null) {
+                throw new IllegalArgumentException("Cannot build a heap with a null element in the list");
+            }
             backingArray[i] = data.get(i - 1);
         }
 
@@ -177,7 +184,7 @@ public class MinHeap<T extends Comparable<? super T>> {
                 backingArray[leftIndex] = swapper;
                 backingArray[index] = leftChild;
                 return leftIndex;
-            } else {
+            } else if (rightChild.compareTo(swapper) < 0) {
                 backingArray[rightIndex] = swapper;
                 backingArray[index] = rightChild;
                 return rightIndex;
