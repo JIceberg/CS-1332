@@ -1,11 +1,7 @@
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -122,6 +118,12 @@ public class LinearProbingHashMapJacksonTest {
         expected[3] = new LinearProbingMapEntry<>(3, "G");
         expected[4].setRemoved(true);
         assertArrayEquals(expected, map.getTable());
+    }
+
+    @Test(timeout = TIMEOUT, expected = NoSuchElementException.class)
+    public void testRemoveFromEmptyList() {
+        map = new LinearProbingHashMap<>(0);
+        map.remove(3);
     }
 
     @Test(timeout = TIMEOUT)

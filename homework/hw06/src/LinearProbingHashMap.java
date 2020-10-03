@@ -8,7 +8,7 @@ import java.util.Set;
  * Your implementation of a LinearProbingHashMap.
  *
  * @author Jackson Isenberg
- * @version 1.3
+ * @version 1.8
  * @userid jisenberg3
  * @GTID 903553138
  *
@@ -58,8 +58,8 @@ public class LinearProbingHashMap<K, V> {
      * @param initialCapacity the initial capacity of the backing array
      */
     public LinearProbingHashMap(int initialCapacity) {
-        if (initialCapacity <= 0) {
-            throw new IllegalArgumentException("Expected initial capacity greater than 0, but was "
+        if (initialCapacity < 0) {
+            throw new IllegalArgumentException("Expected positive initial capacity, but was "
                     + initialCapacity);
         }
         table = (LinearProbingMapEntry<K, V>[]) new LinearProbingMapEntry[initialCapacity];
@@ -108,17 +108,26 @@ public class LinearProbingHashMap<K, V> {
         int originalIndex = Math.abs(key.hashCode() % table.length);
         int index = originalIndex;
         int numProbes = 0;
+        int seen = 0;
         int savedIndex = -1;
         boolean saved = false;
-        while (table[index] != null) {
+        while (seen <= size && table[index] != null) {
             if (!saved && table[index].isRemoved()) {
                 savedIndex = index;
                 saved = true;
-            } else if (!table[index].isRemoved() && table[index].getKey().equals(key)) {
+            } else if (table[index].getKey().equals(key)) {
+                if (table[index].isRemoved()) {
+                    this.size++;
+                    table[savedIndex == -1 ? index : savedIndex] = new LinearProbingMapEntry<>(key, value);
+                    return null;
+                }
                 V old = table[index].getValue();
                 table[index].setValue(value);
                 return old;
             } else {
+                if (!table[index].isRemoved()) {
+                    seen++;
+                }
                 numProbes++;
                 index = (originalIndex + numProbes) % table.length;
             }
@@ -141,16 +150,23 @@ public class LinearProbingHashMap<K, V> {
         if (key == null) {
             throw new IllegalArgumentException("Cannot pass null key into method argument for remove(key)");
         }
+        if (size == 0) {
+            throw new NoSuchElementException("Key '" + key.toString() + "' is not in the map");
+        }
         int originalIndex = Math.abs(key.hashCode() % table.length);
         int index = originalIndex;
+        int seen = 0;
         int numProbes = 0;
-        while (numProbes <= size && table[index] != null) {
+        while (seen <= size && table[index] != null) {
             if (table[index].getKey().equals(key) && !table[index].isRemoved()) {
                 V old = table[index].getValue();
                 table[index].setRemoved(true);
                 this.size--;
                 return old;
             } else {
+                if (!table[index].isRemoved()) {
+                    seen++;
+                }
                 numProbes++;
                 index = (originalIndex + numProbes) % table.length;
             }
@@ -170,13 +186,20 @@ public class LinearProbingHashMap<K, V> {
         if (key == null) {
             throw new IllegalArgumentException("Cannot pass null key into method argument for get(key)");
         }
+        if (size == 0) {
+            throw new NoSuchElementException("Key '" + key.toString() + "' is not in the map");
+        }
         int originalIndex = Math.abs(key.hashCode() % table.length);
         int index = originalIndex;
+        int seen = 0;
         int numProbes = 0;
-        while (numProbes <= size && table[index] != null) {
+        while (seen <= size && table[index] != null) {
             if (table[index].getKey().equals(key) && !table[index].isRemoved()) {
                 return table[index].getValue();
             } else {
+                if (!table[index].isRemoved()) {
+                    seen++;
+                }
                 numProbes++;
                 index = (originalIndex + numProbes) % table.length;
             }
@@ -196,13 +219,20 @@ public class LinearProbingHashMap<K, V> {
         if (key == null) {
             throw new IllegalArgumentException("Cannot pass null key into method argument for get(key)");
         }
+        if (size == 0) {
+            return false;
+        }
         int originalIndex = Math.abs(key.hashCode() % table.length);
         int index = originalIndex;
+        int seen = 0;
         int numProbes = 0;
-        while (numProbes <= size && table[index] != null) {
+        while (seen <= size && table[index] != null) {
             if (table[index].getKey().equals(key)) {
                 return !table[index].isRemoved();
             } else {
+                if (!table[index].isRemoved()) {
+                    seen++;
+                }
                 numProbes++;
                 index = (originalIndex + numProbes) % table.length;
             }
