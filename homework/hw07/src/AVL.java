@@ -9,7 +9,7 @@ import java.util.List;
  * Yes. Yes it is. :flushed:
  *
  * @author Jackson Isenberg
- * @version 1.0
+ * @version 1.2
  * @userid jisenberg3
  * @GTID 903556168
  *
@@ -80,9 +80,7 @@ public class AVL<T extends Comparable<? super T>> {
             this.root = new AVLNode<>(data);
             this.size++;
         } else {
-            AVLNode<T> dummy = new AVLNode<>(root.getData());
-            this.add(data, root, dummy);
-            this.root = dummy;
+            this.root = this.add(data, root);
         }
     }
 
@@ -91,11 +89,11 @@ public class AVL<T extends Comparable<? super T>> {
      *
      * @param data the data to add
      * @param node the root of the subtree
-     * @param dummy the dummy node
+     * @return the new root of the subtree
      */
-    private void add(T data, AVLNode<T> node, AVLNode<T> dummy) {
+    private AVLNode<T> add(T data, AVLNode<T> node) {
         if (node == null) {
-            return;
+            return null;
         }
         int comparison = data.compareTo(node.getData());
         if (comparison > 0) {
@@ -103,7 +101,7 @@ public class AVL<T extends Comparable<? super T>> {
                 node.setRight(new AVLNode<>(data));
                 this.size++;
             } else {
-                this.add(data, node.getRight(), dummy);
+                node.setRight(this.add(data, node.getRight()));
             }
         }
         if (comparison < 0) {
@@ -111,29 +109,12 @@ public class AVL<T extends Comparable<? super T>> {
                 node.setLeft(new AVLNode<>(data));
                 this.size++;
             } else {
-                this.add(data, node.getLeft(), dummy);
+                node.setLeft(this.add(data, node.getLeft()));
             }
         }
         this.updateHeight(node);
         this.updateBalanceFactor(node);
-        this.setDummy(dummy, this.balance(node));
-    }
-
-    /**
-     * Sets the dummy to the node using pointer reinforcement
-     *
-     * @param dummy the dummy node
-     * @param node  the node who will be transferred into the dummy
-     */
-    private void setDummy(AVLNode<T> dummy, AVLNode<T> node) {
-        if (node == null) {
-            return;
-        }
-        dummy.setData(node.getData());
-        dummy.setLeft(node.getLeft());
-        dummy.setRight(node.getRight());
-        dummy.setBalanceFactor(node.getBalanceFactor());
-        dummy.setHeight(node.getHeight());
+        return this.balance(node);
     }
 
     /**
@@ -278,9 +259,10 @@ public class AVL<T extends Comparable<? super T>> {
             tmp = root.getData();
             this.clear();
         } else {
-            AVLNode<T> dummy = new AVLNode<>(root.getData());
-            tmp = this.remove(data, root, dummy);
-            this.root = dummy;
+            tmp = this.remove(data, root);
+            this.updateHeight(root);
+            this.updateBalanceFactor(root);
+            this.root = this.balance(root);
         }
         return tmp;
     }
@@ -290,16 +272,16 @@ public class AVL<T extends Comparable<? super T>> {
      *
      * @param data the data to remove from the tree
      * @param node the current root of the subtree
-     * @param dummy the dummy node
      * @return the data in the node that was removed
      */
-    private T remove(T data, AVLNode<T> node, AVLNode<T> dummy) {
+    private T remove(T data, AVLNode<T> node) {
         if (node == null) {
             throw new NoSuchElementException("Could not find " + data + " in the tree, so nothing was removed");
         }
         int comparison = data.compareTo(node.getData());
+        T temp;
         if (comparison == 0) {
-            T tmp = node.getData();
+            temp = node.getData();
             if (node.getLeft() != null && node.getRight() != null) {
                 AVLNode<T> predecessor = this.predecessor(node, node.getLeft());
                 node.setLeft(predecessor);
@@ -314,30 +296,31 @@ public class AVL<T extends Comparable<? super T>> {
             } else {
                 node.setData(null);
             }
-            this.updateHeight(node);
-            this.updateBalanceFactor(node);
-            this.setDummy(dummy, this.balance(node));
             this.size--;
-            return tmp;
         } else if (comparison < 0) {
-            T temp = remove(data, node.getLeft(), dummy);
+            temp = remove(data, node.getLeft());
             if (node.getLeft() != null && node.getLeft().getData() == null) {
                 node.setLeft(null);
             }
-            this.updateHeight(node);
-            this.updateBalanceFactor(node);
-            this.setDummy(dummy, this.balance(node));
-            return temp;
         } else {
-            T temp = remove(data, node.getRight(), dummy);
+            temp = remove(data, node.getRight());
             if (node.getRight() != null && node.getRight().getData() == null) {
                 node.setRight(null);
             }
-            this.updateHeight(node);
-            this.updateBalanceFactor(node);
-            this.setDummy(dummy, this.balance(node));
-            return temp;
         }
+        this.updateHeight(node);
+        this.updateBalanceFactor(node);
+        if (node.getLeft() != null) {
+            this.updateHeight(node.getLeft());
+            this.updateBalanceFactor(node.getLeft());
+            node.setLeft(this.balance(node.getLeft()));
+        }
+        if (node.getRight() != null) {
+            this.updateHeight(node.getRight());
+            this.updateBalanceFactor(node.getRight());
+            node.setRight(this.balance(node.getRight()));
+        }
+        return temp;
     }
 
     /**
@@ -353,7 +336,11 @@ public class AVL<T extends Comparable<? super T>> {
             currRoot.setData(searchRoot.getData());
             return searchRoot.getLeft();
         }
-        searchRoot.setLeft(predecessor(currRoot, searchRoot.getRight()));
+        searchRoot.setRight(predecessor(currRoot, searchRoot.getRight()));
+        this.updateHeight(searchRoot);
+        this.updateBalanceFactor(searchRoot);
+        this.updateHeight(currRoot);
+        this.updateBalanceFactor(currRoot);
         return searchRoot;
     }
 

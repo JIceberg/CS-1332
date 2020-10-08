@@ -209,6 +209,85 @@ public class AVLJacksonTest {
     }
 
     @Test(timeout = TIMEOUT)
+    public void testAddUnbalancedSubtree() {
+
+        /*
+
+                    201
+                  /     \
+                10      207
+                 \      /
+                 53   202
+
+         */
+
+        tree.add(201);
+        tree.add(10);
+        tree.add(207);
+        tree.add(53);
+        tree.add(202);
+        assertEquals(5, tree.size());
+
+        AVLNode<Integer> root = tree.getRoot();
+        assertEquals((Integer) 201, root.getData());
+        assertEquals(2, root.getHeight());
+        assertEquals(0, root.getBalanceFactor());
+
+        AVLNode<Integer> left = root.getLeft();
+        assertEquals((Integer) 10, left.getData());
+        assertEquals(1, left.getHeight());
+        assertEquals(-1, left.getBalanceFactor());
+
+        AVLNode<Integer> right = root.getRight();
+        assertEquals((Integer) 207, right.getData());
+        assertEquals(1, right.getHeight());
+        assertEquals(1, right.getBalanceFactor());
+
+        AVLNode<Integer> leftRight = left.getRight();
+        assertEquals((Integer) 53, leftRight.getData());
+        assertEquals(0, leftRight.getHeight());
+        assertEquals(0, leftRight.getBalanceFactor());
+
+        AVLNode<Integer> rightLeft = right.getLeft();
+        assertEquals((Integer) 202, rightLeft.getData());
+        assertEquals(0, rightLeft.getHeight());
+        assertEquals(0, rightLeft.getBalanceFactor());
+
+        tree.add(22);
+        assertEquals(6, tree.size());
+
+        root = tree.getRoot();
+        assertEquals((Integer) 201, root.getData());
+        assertEquals(2, root.getHeight());
+        assertEquals(0, root.getBalanceFactor());
+
+        left = root.getLeft();
+        assertEquals((Integer) 22, left.getData());
+        assertEquals(1, left.getHeight());
+        assertEquals(0, left.getBalanceFactor());
+
+        right = root.getRight();
+        assertEquals((Integer) 207, right.getData());
+        assertEquals(1, right.getHeight());
+        assertEquals(1, right.getBalanceFactor());
+
+        AVLNode<Integer> leftLeft = left.getLeft();
+        assertEquals((Integer) 10, leftLeft.getData());
+        assertEquals(0, leftLeft.getHeight());
+        assertEquals(0, leftLeft.getBalanceFactor());
+
+        leftRight = left.getRight();
+        assertEquals((Integer) 53, leftRight.getData());
+        assertEquals(0, leftRight.getHeight());
+        assertEquals(0, leftRight.getBalanceFactor());
+
+        rightLeft = right.getLeft();
+        assertEquals((Integer) 202, rightLeft.getData());
+        assertEquals(0, rightLeft.getHeight());
+        assertEquals(0, rightLeft.getBalanceFactor());
+    }
+
+    @Test(timeout = TIMEOUT)
     public void testAddBalanced() {
         /*
                   4
@@ -423,6 +502,150 @@ public class AVLJacksonTest {
         assertEquals((Integer) 6, rightRight.getData());
         assertEquals(0, rightRight.getHeight());
         assertEquals(0, rightRight.getBalanceFactor());
+    }
+
+    @Test(timeout = TIMEOUT)
+    public void testRemoveRotateSubtree() {
+        Integer temp = 5;
+
+        /*
+                    6
+                  /   \
+                 3     7
+                / \     \
+               1   5     9
+              /
+             0
+
+             ->
+
+                    6
+                  /   \
+                 1     7
+                / \     \
+               0   3     9
+         */
+
+        tree.add(6);
+        tree.add(3);
+        tree.add(7);
+        tree.add(1);
+        tree.add(temp);
+        tree.add(9);
+        tree.add(0);
+        assertEquals(7, tree.size());
+
+        AVLNode<Integer> root = tree.getRoot();
+        assertEquals((Integer) 6, root.getData());
+        assertEquals(3, root.getHeight());
+        assertEquals(1, root.getBalanceFactor());
+
+        AVLNode<Integer> left = root.getLeft();
+        assertEquals((Integer) 3, left.getData());
+        assertEquals(2, left.getHeight());
+        assertEquals(1, left.getBalanceFactor());
+
+        AVLNode<Integer> leftLeft = left.getLeft();
+        assertEquals((Integer) 1, leftLeft.getData());
+        assertEquals(1, leftLeft.getHeight());
+        assertEquals(1, leftLeft.getBalanceFactor());
+
+        AVLNode<Integer> leftLeftLeft = leftLeft.getLeft();
+        assertEquals((Integer) 0, leftLeftLeft.getData());
+        assertEquals(0, leftLeftLeft.getHeight());
+        assertEquals(0, leftLeftLeft.getBalanceFactor());
+
+        AVLNode<Integer> leftRight = left.getRight();
+        assertEquals((Integer) 5, leftRight.getData());
+        assertEquals(0, leftRight.getHeight());
+        assertEquals(0, leftRight.getBalanceFactor());
+
+        AVLNode<Integer> right = root.getRight();
+        assertEquals((Integer) 7, right.getData());
+        assertEquals(1, right.getHeight());
+        assertEquals(-1, right.getBalanceFactor());
+
+        AVLNode<Integer> rightRight = right.getRight();
+        assertEquals((Integer) 9, rightRight.getData());
+        assertEquals(0, rightRight.getHeight());
+        assertEquals(0, rightRight.getBalanceFactor());
+
+        assertSame(temp, tree.remove(5));
+        assertEquals(6, tree.size());
+
+        root = tree.getRoot();
+        assertEquals((Integer) 6, root.getData());
+        assertEquals(2, root.getHeight());
+        assertEquals(0, root.getBalanceFactor());
+
+        left = root.getLeft();
+        assertEquals((Integer) 1, left.getData());
+        assertEquals(1, left.getHeight());
+        assertEquals(0, left.getBalanceFactor());
+
+        leftLeft = left.getLeft();
+        assertEquals((Integer) 0, leftLeft.getData());
+        assertEquals(0, leftLeft.getHeight());
+        assertEquals(0, leftLeft.getBalanceFactor());
+
+        leftRight = left.getRight();
+        assertEquals((Integer) 3, leftRight.getData());
+        assertEquals(0, leftRight.getHeight());
+        assertEquals(0, leftRight.getBalanceFactor());
+
+        right = root.getRight();
+        assertEquals((Integer) 7, right.getData());
+        assertEquals(1, right.getHeight());
+        assertEquals(-1, right.getBalanceFactor());
+
+        rightRight = right.getRight();
+        assertEquals((Integer) 9, rightRight.getData());
+        assertEquals(0, rightRight.getHeight());
+        assertEquals(0, rightRight.getBalanceFactor());
+    }
+
+    @Test(timeout = TIMEOUT)
+    public void testRemovePredecessorUpdateHeight() {
+        Integer temp = -352;
+
+        /*
+                  -109
+                 /     \
+              -352     169
+             /   \        \
+          -960  -161      261
+             \
+            -944
+
+            ->
+
+                  -109
+                 /     \
+              -944     169
+             /   \        \
+          -960  -161      261
+         */
+
+
+        tree.add(-109);
+        tree.add(temp);
+        tree.add(169);
+        tree.add(-960);
+        tree.add(-161);
+        tree.add(261);
+        tree.add(-944);
+        assertEquals(7, tree.size());
+
+        assertSame(temp, tree.remove(-352));
+        assertEquals(6, tree.size());
+        AVLNode<Integer> root = tree.getRoot();
+        assertEquals((Integer) (-109), root.getData());
+        assertEquals(2, root.getHeight());
+        assertEquals(0, root.getBalanceFactor());
+        AVLNode<Integer> left = root.getLeft();
+        assertEquals((Integer) (-944), left.getData());
+        assertEquals(1, left.getHeight());
+        assertEquals(0, left.getBalanceFactor());
     }
 
     @Test(timeout = TIMEOUT)
