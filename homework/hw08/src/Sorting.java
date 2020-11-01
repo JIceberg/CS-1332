@@ -1,17 +1,18 @@
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.Random;
 
 /**
  * Your implementation of various sorting algorithms.
  *
- * @author YOUR NAME HERE
- * @version 1.0
- * @userid YOUR USER ID HERE (i.e. gburdell3)
- * @GTID YOUR GT ID HERE (i.e. 900000000)
+ * @author Jackson Isenberg
+ * @version 1.1
+ * @userid jisenberg3 (i.e. gburdell3)
+ * @GTID 903556168 (i.e. 900000000)
  *
- * Collaborators: LIST ALL COLLABORATORS YOU WORKED WITH HERE
+ * Collaborators: N/A
  *
- * Resources: LIST ALL NON-COURSE RESOURCES YOU CONSULTED HERE
+ * Resources: N/A
  */
 
 public class Sorting {
@@ -137,7 +138,7 @@ public class Sorting {
      * @param <T>        data type to sort
      * @param arr        the array to be sorted
      * @param comparator the Comparator used to compare the data in arr
-     * @throws java.lang.IllegalArgumentException if the array or comparator is
+     * @throws IllegalArgumentException if the array or comparator is
      *                                            null
      */
     public static <T> void mergeSort(T[] arr, Comparator<T> comparator) {
@@ -153,37 +154,37 @@ public class Sorting {
         // create the left and right subarrays
         int length = arr.length;
         int mid = length / 2;
-        T[] L = (T[]) new Object[mid];
-        T[] R = (T[]) new Object[length - mid];
+        T[] left = (T[]) new Object[mid];
+        T[] right = (T[]) new Object[length - mid];
         for (int i = 0; i < mid; i++) {
-            L[i] = arr[i];
+            left[i] = arr[i];
         }
         for (int i = mid; i < length; i++) {
-            R[i - mid] = arr[i];
+            right[i - mid] = arr[i];
         }
-        mergeSort(L, comparator);
-        mergeSort(R, comparator);
+        mergeSort(left, comparator);
+        mergeSort(right, comparator);
 
         // merge the two arrays
         int i = 0;
         int j = 0;
-        while (i < L.length && j < R.length) {
-            if (comparator.compare(R[j], L[i]) > 0) {
-                arr[i + j] = L[i];
+        while (i < left.length && j < right.length) {
+            if (comparator.compare(right[j], left[i]) > 0) {
+                arr[i + j] = left[i];
                 i++;
             } else {
-                arr[i + j] = R[j];
+                arr[i + j] = right[j];
                 j++;
             }
         }
 
         // copy over the rest of the array if needed
-        while (i < L.length) {
-            arr[i + j] = L[i];
+        while (i < left.length) {
+            arr[i + j] = left[i];
             i++;
         }
-        while (j < R.length) {
-            arr[i + j] = R[j];
+        while (j < right.length) {
+            arr[i + j] = right[j];
             j++;
         }
     }
@@ -230,7 +231,36 @@ public class Sorting {
      * @throws java.lang.IllegalArgumentException if the array is null
      */
     public static void lsdRadixSort(int[] arr) {
+        if (arr == null) {
+            throw new IllegalArgumentException("Arguments must be non-null");
+        }
 
+        // find the max value
+        int max = arr[0];
+        for (int i = 1; i < arr.length; i++) {
+            int abs = arr[i] == Integer.MIN_VALUE ? Integer.MAX_VALUE : Math.abs(arr[i]);
+            if (abs > max) {
+                max = abs;
+            }
+        }
+
+        // perform the sort using buckets
+        LinkedList<Integer>[] buckets = (LinkedList<Integer>[]) new LinkedList[19];
+        for (int pow = 1; max / pow > 0; pow *= 10) {
+            for (int i = 0; i < arr.length; i++) {
+                int digit = (arr[i] / pow) % 10;
+                if (buckets[digit + 9] == null) {
+                    buckets[digit + 9] = new LinkedList<>();
+                }
+                buckets[digit + 9].add(arr[i]);
+            }
+            int idx = 0;
+            for (LinkedList<Integer> bucket : buckets) {
+                while (bucket != null && !bucket.isEmpty()) {
+                    arr[idx++] = bucket.remove();
+                }
+            }
+        }
     }
 
     /**
@@ -271,6 +301,48 @@ public class Sorting {
      */
     public static <T> void quickSort(T[] arr, Comparator<T> comparator,
                                      Random rand) {
+        quickSort(arr, 0, arr.length - 1, comparator, rand);
+    }
 
+    /**
+     * Quicksort helper method
+     *
+     * @param <T>           data type to sort
+     * @param arr           the array that must be sorted after the method runs
+     * @param a             the start index
+     * @param b             the end index
+     * @param comparator    the Comparator used to compare the data in arr
+     * @param rand          the Random object used to select pivots
+     */
+    private static <T> void quickSort(T[] arr, int a, int b, Comparator<T> comparator, Random rand) {
+        if (b - a < 1) {
+            return;
+        }
+        int pivotIndex = rand.nextInt(b - a + 1) + a;
+        T pivot = arr[pivotIndex];
+        arr[pivotIndex] = arr[a];
+        arr[a] = pivot;
+        int i = a + 1;
+        int j = b;
+        while (j >= i) {
+            while (j >= i && comparator.compare(arr[i], pivot) <= 0) {
+                i++;
+            }
+            while (j >= i && comparator.compare(arr[j], pivot) >= 0) {
+                j--;
+            }
+            if (j >= i) {
+                T temp = arr[j];
+                arr[j] = arr[i];
+                arr[i] = temp;
+                i++;
+                j--;
+            }
+        }
+        T temp = arr[a];
+        arr[a] = arr[j];
+        arr[j] = temp;
+        quickSort(arr, a, j - 1, comparator, rand);
+        quickSort(arr, j + 1, b, comparator, rand);
     }
 }
