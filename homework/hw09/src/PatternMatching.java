@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +13,7 @@ import java.util.Map;
  *
  * Collaborators: N/A
  *
- * Resources: N/A
+ * Resources: LeetCode
  */
 public class PatternMatching {
 
@@ -32,7 +34,37 @@ public class PatternMatching {
      */
     public static List<Integer> kmp(CharSequence pattern, CharSequence text,
                                     CharacterComparator comparator) {
-
+        List<Integer> indices = new ArrayList<>();
+        if (pattern == null || pattern.length() == 0) {
+            throw new IllegalArgumentException("Pattern must be nonnull and have length greater than 0");
+        } else if (text == null) {
+            throw new IllegalArgumentException("Text sequence cannot be null");
+        } else if (comparator == null) {
+            throw new IllegalArgumentException("Comparator cannot be null");
+        } else {
+            if (text.length() < pattern.length()) {
+                return indices;
+            }
+            int[] f = buildFailureTable(pattern, comparator);
+            int j = 0;
+            int i = 0;
+            while (i + pattern.length() - 1 - j < text.length()) {
+                if (comparator.compare(pattern.charAt(j), text.charAt(i)) == 0) {
+                    if (j == pattern.length() - 1) {
+                        indices.add(i++ - j);
+                        j = f[j];
+                    } else {
+                        j++;
+                        i++;
+                    }
+                } else if (j == 0) {
+                    i++;
+                } else {
+                    j = f[j - 1];
+                }
+            }
+        }
+        return indices;
     }
 
     /**
@@ -65,7 +97,25 @@ public class PatternMatching {
      */
     public static int[] buildFailureTable(CharSequence pattern,
                                           CharacterComparator comparator) {
-
+        if (pattern == null) {
+            throw new IllegalArgumentException("Pattern cannot be null to build failure table");
+        } else if (comparator == null) {
+            throw new IllegalArgumentException("Comparator cannot be null to build failure table");
+        } else {
+            int[] table = new int[pattern.length()];    // initializes an array of pattern length with all 0s
+            int i = 0;
+            int j = 1;
+            while (j < table.length) {
+                if (comparator.compare(pattern.charAt(i), pattern.charAt(j)) == 0) {
+                    table[j++] = ++i;
+                } else if (i == 0) {
+                    table[j++] = 0;
+                } else {
+                    i = table[i - 1];
+                }
+            }
+            return table;
+        }
     }
 
     /**
@@ -89,7 +139,35 @@ public class PatternMatching {
     public static List<Integer> boyerMoore(CharSequence pattern,
                                            CharSequence text,
                                            CharacterComparator comparator) {
-
+        List<Integer> indices = new ArrayList<>();
+        if (pattern == null || pattern.length() == 0) {
+            throw new IllegalArgumentException("Pattern must be nonnull and have length greater than 0");
+        } else if (text == null) {
+            throw new IllegalArgumentException("Text sequence cannot be null");
+        } else if (comparator == null) {
+            throw new IllegalArgumentException("Comparator cannot be null");
+        } else {
+            Map<Character, Integer> last = buildLastTable(pattern);
+            int i = 0;
+            while (i <= text.length() - pattern.length()) {
+                int j = pattern.length() - 1;
+                while (j >= 0 && comparator.compare(text.charAt(i + j), pattern.charAt(j)) == 0) {
+                    j--;
+                }
+                if (j == -1) {
+                    indices.add(i);
+                    i++;
+                } else {
+                    int shift = last.getOrDefault(text.charAt(i + j), -1);
+                    if (shift < j) {
+                        i += j - shift;
+                    } else {
+                        i++;
+                    }
+                }
+            }
+        }
+        return indices;
     }
 
     /**
@@ -119,7 +197,14 @@ public class PatternMatching {
      * @throws java.lang.IllegalArgumentException if the pattern is null
      */
     public static Map<Character, Integer> buildLastTable(CharSequence pattern) {
-
+        if (pattern == null) {
+            throw new IllegalArgumentException("Cannot build a last occurrence table with a null pattern");
+        }
+        Map<Character, Integer> map = new HashMap<>();
+        for (int i = 0; i < pattern.length(); i++) {
+            map.put(pattern.charAt(i), i);
+        }
+        return map;
     }
 
     /**
@@ -188,6 +273,85 @@ public class PatternMatching {
     public static List<Integer> rabinKarp(CharSequence pattern,
                                           CharSequence text,
                                           CharacterComparator comparator) {
+        List<Integer> indices = new ArrayList<>();
+        if (pattern == null || pattern.length() == 0) {
+            throw new IllegalArgumentException("Pattern must be nonnull and have length greater than 0");
+        } else if (text == null) {
+            throw new IllegalArgumentException("Text sequence cannot be null");
+        } else if (comparator == null) {
+            throw new IllegalArgumentException("Comparator cannot be null");
+        } else {
+            if (pattern.length() > text.length()) {
+                return indices;
+            }
+            int[] hashesAndPow = hash(text, pattern, 0, pattern.length());
+            int substringHash = hashesAndPow[0];
+            int patternHash = hashesAndPow[1];
+            int pow = hashesAndPow[2];
+            int i = 0;
+            int j = 0;
+            while (i <= text.length() - pattern.length()) {
+                if (substringHash == patternHash
+                        && comparator.compare(text.charAt(i + j), pattern.charAt(j)) == 0) {
+                    if (j == pattern.length() - 1) {
+                        indices.add(i);
+                        j = 0;
+                        if (i + pattern.length() < text.length()) {
+                            substringHash = nextHash(text.charAt(i), text.charAt(i + pattern.length()),
+                                    substringHash, pow);
+                        }
+                        i++;
+                    } else {
+                        j++;
+                    }
+                } else {
+                    if (i + pattern.length() < text.length()) {
+                        substringHash = nextHash(text.charAt(i), text.charAt(i + pattern.length()),
+                                substringHash, pow);
+                    }
+                    j = 0;
+                    i++;
+                }
+            }
+        }
+        return indices;
+    }
 
+    /**
+     * A helper method to compute the hash
+     *
+     * @param text      the sequence of characters for the text
+     * @param pattern   the sequence of characters for the pattern
+     * @param start     the start of the substring in the sequence
+     * @param length    the length of the substring
+     * @return the hash of the substring
+     */
+    private static int[] hash(CharSequence text, CharSequence pattern, int start, int length) {
+        int pow = 1;
+        int textHash = 0;
+        int patternHash = 0;
+        for (int i = start + length - 1; i >= start; i--) {
+            textHash += Character.hashCode(text.charAt(i)) * pow;
+            patternHash += Character.hashCode(pattern.charAt(i - start)) * pow;
+            // lol gg ez
+            if (i > start) {
+                pow *= BASE;
+            }
+        }
+        return new int[]{textHash, patternHash, pow};
+    }
+
+    /**
+     * A helper method to compute the next hash
+     * for the rolling hash method
+     *
+     * @param oldChar   the old character to be removed from the substring
+     * @param newChar   the new character to be added to the substring
+     * @param oldHash   the old hash
+     * @param pow       the power we computed at the start
+     * @return the new hash
+     */
+    private static int nextHash(char oldChar, char newChar, int oldHash, int pow) {
+        return (oldHash - Character.hashCode(oldChar) * pow) * BASE + Character.hashCode(newChar);
     }
 }

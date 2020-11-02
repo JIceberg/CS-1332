@@ -11,21 +11,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertArrayEquals;
 
 /**
- * This is a basic set of unit tests for ParternMatching.
+ * A combination of TA tests and my own tests.
  *
- * Passing these tests doesn't guarantee any grade on these assignments. These
- * student JUnits that we provide should be thought of as a sanity check to
- * help you get started on the homework and writing JUnits in general.
- *
- * We highly encourage you to write your own set of JUnits for each homework
- * to cover edge cases you can think of for each data structure. Your code must
- * work correctly and efficiently in all cases, which is why it's important
- * to write comprehensive tests to cover as many cases as possible.
- *
- * @author CS 1332 TAs
+ * @author Jackson
  * @version 1.0
  */
-public class PatternMatchingStudentTest {
+public class PatternMatchingJacksonTest {
 
     private static final int TIMEOUT = 200;
 
@@ -251,6 +242,32 @@ public class PatternMatchingStudentTest {
                 comparator.getComparisonCount() != 0);
         assertEquals("Comparison count was " + comparator.getComparisonCount()
                 + ". Should be 5.", 5, comparator.getComparisonCount());
+
+        /*
+            pattern: aaaa
+            text: aa
+            indices: 0, 1, 2
+            expected total comparisons: 6
+
+            | a | a | a | a |
+            | a | a |   |   |  <- 2 comparisons
+            |   | a | a |   |  <- 2 comparisons
+            |   |   | a | a |  <- 2 comparisons
+         */
+        List<Integer> multipleAnswerIncrement = new ArrayList<>() {
+            {
+                add(0);
+                add(1);
+                add(2);
+            }
+        };
+        String multiplePatternIncrement = "aa";
+        String multipleTextIncrement = "aaaa";
+        assertEquals(multipleAnswerIncrement,
+                PatternMatching.boyerMoore(multiplePatternIncrement,
+                        multipleTextIncrement, comparator));
+        assertEquals("Comparison count was " + (comparator.getComparisonCount() - 5)
+                + ". Should be 6.", 6, comparator.getComparisonCount() - 5);
     }
 
     @Test(timeout = TIMEOUT)
