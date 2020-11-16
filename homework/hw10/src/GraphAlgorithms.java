@@ -242,6 +242,23 @@ public class GraphAlgorithms {
      * @throws IllegalArgumentException if any input is null
      */
     public static <T> Set<Edge<T>> kruskals(Graph<T> graph) {
-        return null;
+        if (graph == null) {
+            throw new IllegalArgumentException("Arguments must be nonnull");
+        } else {
+            DisjointSet<Vertex<T>> disjointSet = new DisjointSet<>();
+            Set<Edge<T>> mst = new HashSet<>();
+            Queue<Edge<T>> queue = new PriorityQueue<>(graph.getEdges());
+
+            while (!queue.isEmpty() && mst.size() < 2 * (graph.getVertices().size() - 1)) {
+                Edge<T> e = queue.poll();
+                if (disjointSet.find(e.getU()) != disjointSet.find(e.getV())) {
+                    mst.add(e);
+                    mst.add(new Edge<>(e.getV(), e.getU(), e.getWeight()));
+                    disjointSet.union(e.getU(), e.getV());
+                }
+            }
+
+            return mst.size() < 2 * (graph.getVertices().size() - 1) ? null : mst;
+        }
     }
 }
