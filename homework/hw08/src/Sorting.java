@@ -6,7 +6,7 @@ import java.util.Random;
  * Your implementation of various sorting algorithms.
  *
  * @author Jackson Isenberg
- * @version 1.1
+ * @version 1.2
  * @userid jisenberg3 (i.e. gburdell3)
  * @GTID 903556168 (i.e. 900000000)
  *
@@ -169,7 +169,7 @@ public class Sorting {
         int i = 0;
         int j = 0;
         while (i < left.length && j < right.length) {
-            if (comparator.compare(right[j], left[i]) > 0) {
+            if (comparator.compare(right[j], left[i]) >= 0) {
                 arr[i + j] = left[i];
                 i++;
             } else {
@@ -236,8 +236,8 @@ public class Sorting {
         }
 
         // find the max value
-        int max = arr[0];
-        for (int i = 1; i < arr.length; i++) {
+        int max = 0;
+        for (int i = 0; i < arr.length; i++) {
             int abs = arr[i] == Integer.MIN_VALUE ? Integer.MAX_VALUE : Math.abs(arr[i]);
             if (abs > max) {
                 max = abs;
@@ -301,6 +301,9 @@ public class Sorting {
      */
     public static <T> void quickSort(T[] arr, Comparator<T> comparator,
                                      Random rand) {
+        if (arr == null || comparator == null || rand == null) {
+            throw new IllegalArgumentException("Arguments must be nonnull");
+        }
         quickSort(arr, 0, arr.length - 1, comparator, rand);
     }
 
