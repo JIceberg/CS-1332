@@ -209,6 +209,36 @@ public class AVLJacksonTest {
     }
 
     @Test(timeout = TIMEOUT)
+    public void testMinOfDeepest() {
+
+        Integer temp = -1;
+
+        /*
+
+                  4
+                /   \
+               1     5
+              / \     \
+             0   2     6
+            /     \
+          -1       3
+
+         */
+
+        tree.add(4);
+        tree.add(1);
+        tree.add(5);
+        tree.add(0);
+        tree.add(2);
+        tree.add(6);
+        tree.add(3);
+        tree.add(temp);
+        assertEquals(8, tree.size());
+
+        assertEquals(temp, tree.minOfDeepest());
+    }
+
+    @Test(timeout = TIMEOUT)
     public void testAddUnbalancedSubtree() {
 
         /*

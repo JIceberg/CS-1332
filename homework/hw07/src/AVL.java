@@ -606,6 +606,29 @@ public class AVL<T extends Comparable<? super T>> {
         }
     }
 
+    public T minOfDeepest() {
+        return minOfDeepestHelper(root).getData();
+    }
+
+    private AVLNode<T> minOfDeepestHelper(AVLNode<T> node) {
+        if (node.getHeight() == 0) {
+            return node;
+        }
+        if (node.getBalanceFactor() == 0) {
+            AVLNode<T> left = minOfDeepestHelper(node.getLeft());
+            AVLNode<T> right = minOfDeepestHelper(node.getRight());
+            if (left.getData().compareTo(right.getData()) <= 0) {
+                return left;
+            } else {
+                return right;
+            }
+        } else if (node.getBalanceFactor() > 0) {
+            return minOfDeepestHelper(node.getLeft());
+        } else {
+            return minOfDeepestHelper(node.getRight());
+        }
+    }
+
     /**
      * Returns the root of the tree.
      *
