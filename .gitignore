@@ -1,0 +1,10 @@
+/.idea/
+/homework/.idea/
+/homework/hw02/.idea/
+/homework/hw01/.idea/
+*.iml
+out/
+/images/
+**/.idea/
+.idea/
+**/*/.idea/
